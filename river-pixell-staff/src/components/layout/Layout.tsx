@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 export function Layout({ isLoggedIn, onLogin }: LayoutProps) {
   return (
-    <div className="p-8 flex flex-col min-h-screen bg-stone-200">
+    <div className="layoutFlex">
       <Nav
         onLogin={onLogin}
         isLoggedIn={isLoggedIn}
