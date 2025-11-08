@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
 import { Select } from "../../ui/Select";
@@ -7,7 +7,8 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import * as EmployeeService from "../../../services/employeeService";
 import type { Employee } from "../../../types/Employee";
-import employeesJson from "../../../data/employees.json";
+import { validateEmployee } from "../../../services/employeeValidation";
+
 
 interface EmployeeFormProps {
   formMode: "edit" | "create";
@@ -20,12 +21,18 @@ const DEFAULT_EMPLOYEE: Employee = {
   department: "",
 };
 
+
 export function EmployeeForm({ formMode, employeeId }: EmployeeFormProps) {
   const { employees } = useEmployees([], null);
   const [employeeData, setEmployeeData] = useState<Employee>(DEFAULT_EMPLOYEE);
   const [errors, setErrors] = useState<Map<string, string>>(new Map());
-  const departmentOptions = Object.keys(employeesJson.departments ?? {});
-  let navigate = useNavigate();
+  const navigate = useNavigate();
+
+    const departmentOptions = useMemo(
+    () => Array.from(new Set(employees.map(e => e.department))).sort(),
+    [employees]
+  );
+
   
 
   useEffect(() => {
@@ -58,25 +65,24 @@ export function EmployeeForm({ formMode, employeeId }: EmployeeFormProps) {
   };
 
   const onSubmit = async () => {
-    const employeeErrors = await EmployeeService.validateEmployee(employeeData);
-    setErrors(employeeErrors);
+      const employeeErrors = await validateEmployee(employeeData);
+  setErrors(employeeErrors);
 
     if (employeeErrors.size == 0) {
       let toastMessage = `Successfully created new employee ${employeeData.name}!`;
       let employeeId = employeeData.id;
 
       if (formMode == "create") {
-        const newEmployee = await EmployeeService.createNewEmployee(employeeData);
+        const newEmployee = await EmployeeService.createNewEmployee({
 
-        if (newEmployee) {
-            employeeId = newEmployee.id;
+            id: "0",
+            name: employeeData.name,
+            department: employeeData.department,
+          } as Employee);
+        } else {
+          toastMessage = "Successfully updated employee!";
+          await EmployeeService.updateEmployee(employeeData);
         }
-
-      } else {
- 
-        toastMessage = "Successfully updated employee!";
-        await EmployeeService.updateEmployee(employeeData);
-      }
 
       toast(toastMessage, {
         position: "bottom-center",

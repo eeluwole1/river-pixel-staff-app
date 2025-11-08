@@ -1,43 +1,53 @@
-import employeesJson from "../data/employees.json";
+import type { BaseResponse } from "../types/BaseResponse";
 import type { Employee } from "../types/Employee";
 
-export const employeeData: Employee[] = Object.entries(
-  employeesJson.departments as Record<string, string[]>
-).flatMap(([department, names]) =>
-  names.map((name, employeeIndex) => ({
-    id: `${department}-${employeeIndex}-${name}`,
-    name,
-    department,
-  }))
-);
+const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1`;
 
-export function getEmployees() {
-  return employeeData;
+export type EmployeeCreateInput = {
+  name: string;
+  department: string;
+  roleId?: string | null;
+};
+
+export async function getEmployees(): Promise<Employee[]> {
+  const res: Response = await fetch(`${BASE_URL}/employees`);
+  if (!res.ok) throw new Error("Failed to fetch employees");
+  const json: BaseResponse<Employee[]> = await res.json();
+  return json.data!;
 }
 
-export function getEmployeeById(employeeId: string): Employee {
-  const foundEmployee = employeeData.find((e) => e.id === employeeId);
-  if (!foundEmployee) throw new Error(`Failed to fetch employee with ${employeeId}`);
-  return foundEmployee;
+export async function getEmployeeById(employeeId: string): Promise<Employee> {
+  const res: Response = await fetch(`${BASE_URL}/employees/${employeeId}`);
+  if (!res.ok) throw new Error(`Failed to fetch employee with ${employeeId}`);
+  const json: BaseResponse<Employee> = await res.json();
+  return json.data!;
 }
 
-export async function createEmployee(employee: Employee) {
-  employeeData.push(employee);
-  return employee;
+export async function createEmployee(employee: Employee): Promise<Employee> {
+  const res: Response = await fetch(`${BASE_URL}/employees/create`, {
+    method: "POST",
+    body: JSON.stringify(employee),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error("Failed to create employee");
+  const json: BaseResponse<Employee> = await res.json();
+  return json.data!;
 }
 
-export async function updateEmployee(employee: Employee) {
-  const foundEmployeeIndex = employeeData.findIndex((e) => e.id === employee.id);
-  if (foundEmployeeIndex === -1) {
-    throw new Error(`Failed to update employee with ${employee.id}`);
-  }
-  employeeData[foundEmployeeIndex] = employee;
-  return employeeData[foundEmployeeIndex];
+export async function updateEmployee(employee: Employee):Promise<Employee> {
+  const res: Response = await fetch(`${BASE_URL}/employees/update/${employee.id}`, {
+    method: "PUT",
+    body: JSON.stringify(employee),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error(`Failed to update employee with id ${employee.id}`);
+  const json: BaseResponse<Employee> = await res.json();
+  return json.data!;
 }
 
-export async function updateEmployeeDepartment(employeeId: string, department: string) {
-  const foundEmployee = employeeData.find((e) => e.id === employeeId);
-  if (!foundEmployee) throw new Error(`Failed to fetch employee with ${employeeId}`);
-  foundEmployee.department = department;
-  return foundEmployee;
+export async function deleteEmployee(employeeId: string): Promise<void> {
+  const res: Response = await fetch(`${BASE_URL}/employees/delete/${employeeId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`Failed to delete employee with id ${employeeId}`);
 }

@@ -1,29 +1,58 @@
-import organizationJson from "../../data/organization.json";
+import { useEffect, useState } from "react";
+import * as OrgRepo from "../../apis/organizationRepo";
 
 interface LeadershipRole {
   role: string;
   description: (string | null)[];
+  holders: string[];
 }
 
 export function Organization() {
-  const leadershipRoles = new Array<LeadershipRole>();
+  const [leadershipRoles, setLeadershipRoles] = useState<LeadershipRole[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
 
-  const populateLeadershipRoles = () => {
-    for (const role of Object.keys((organizationJson as any).role)) {
-      const leadershipRole: LeadershipRole = {
-        role,
-        description: [],
-      };
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      for (const people of (organizationJson as any).role[role]) {
-        leadershipRole.description.push(people);
+        const [roles, employees] = await Promise.all([
+          OrgRepo.getRoles(),
+          OrgRepo.getEmployees(),
+        ]);
+
+        const byRoleId = new Map<string, string[]>();
+        for (const e of employees) {
+          const key = e.roleId ?? "__no_role__";
+          if (!byRoleId.has(key)) byRoleId.set(key, []);
+          byRoleId.get(key)!.push(e.name);
+        }
+        setLeadershipRoles(
+          roles.map((r) => ({
+            role: r.name,
+            description: r.description
+              ? r.description
+                  .split("\n")
+                  .map(s => s.trim())
+                  .filter(Boolean)
+              : [],                         // keep as array
+            holders: byRoleId.get(r.id) ?? [],
+          }))
+        );
+      } catch (err) {
+        setError(String(err));
+      } finally {
+        setLoading(false);
       }
+    })();
+  }, []);
 
-      leadershipRoles.push(leadershipRole);
-    }
-  };
 
-  populateLeadershipRoles();
+  if (loading) return <main><p>Loading organization…</p></main>;
+  if (error) return <main><p className="error">{error}</p></main>;
 
   return (
     <main>

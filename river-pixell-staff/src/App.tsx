@@ -9,8 +9,7 @@ import { Organization } from "./components/organization-list/Organization";
 import { ToastContainer } from "react-toastify";
 
 
-
-export default function App() {
+function App() {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const onLogin = () => setLoggedIn(!loggedIn);
 
@@ -34,3 +33,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+export default App;

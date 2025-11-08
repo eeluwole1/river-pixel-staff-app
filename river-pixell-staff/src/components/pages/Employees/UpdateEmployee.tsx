@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { EmployeeForm } from "../../../components/employee-list/EmployeeForm/EmployeeForm";
+import { EmployeeForm } from "../../employee-list/EmployeeForm/EmployeeForm";
 
 export function UpdateEmployee() {
   const { id } = useParams();

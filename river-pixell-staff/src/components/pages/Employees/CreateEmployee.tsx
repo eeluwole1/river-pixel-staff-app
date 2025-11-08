@@ -1,4 +1,4 @@
-import { EmployeeForm } from "../../../components/employee-list/EmployeeForm/EmployeeForm";
+import { EmployeeForm } from "../../employee-list/EmployeeForm/EmployeeForm";
 
 export function CreateEmployee() {
   return <EmployeeForm formMode="create" />;

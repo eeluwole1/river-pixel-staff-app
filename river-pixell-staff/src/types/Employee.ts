@@ -1,5 +1,9 @@
 export interface Employee {
   id: string; 
-  name: string; 
+  name: string;
+  email?: string;
   department: string;
+  roleId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
