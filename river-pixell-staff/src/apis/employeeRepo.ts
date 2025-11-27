@@ -1,5 +1,7 @@
 import type { BaseResponse } from "../types/BaseResponse";
 import type { Employee } from "../types/Employee";
+import { useAuth } from "@clerk/clerk-react";
+
 
 const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1`;
 
@@ -35,10 +37,15 @@ export async function createEmployee(employee: Employee): Promise<Employee> {
 }
 
 export async function updateEmployee(employee: Employee):Promise<Employee> {
+  const { getToken } = useAuth();
+  const token = await getToken();
+
   const res: Response = await fetch(`${BASE_URL}/employees/update/${employee.id}`, {
     method: "PUT",
     body: JSON.stringify(employee),
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+     },
   });
   if (!res.ok) throw new Error(`Failed to update employee with id ${employee.id}`);
   const json: BaseResponse<Employee> = await res.json();

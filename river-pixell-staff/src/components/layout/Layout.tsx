@@ -2,16 +2,10 @@ import { Outlet } from "react-router-dom";
 import Nav from "./nav/Nav";
 import Footer from "./footer/Footer";
 
-interface LayoutProps {
-  isLoggedIn: boolean;
-  onLogin: () => void;
-}
-export function Layout({ isLoggedIn, onLogin }: LayoutProps) {
+export function Layout() {
   return (
     <div className="layoutFlex">
       <Nav
-        onLogin={onLogin}
-        isLoggedIn={isLoggedIn}
       />
       <main className="flex-grow">
         <Outlet />

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import { Route, Routes, Navigate, BrowserRouter } from "react-router";
 import { Layout } from "./components/layout/Layout";
 import { EmployeesPage } from "./components/employee-list/employeeP/EmployeesPage";
@@ -10,13 +10,14 @@ import { ToastContainer } from "react-toastify";
 
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
-  const onLogin = () => setLoggedIn(!loggedIn);
-
   return (
-    <BrowserRouter>
+  <BrowserRouter>
+      <SignedOut>
+      <RedirectToSignIn />
+      </SignedOut>
+      <SignedIn>
       <Routes>
-        <Route path="/" element={<Layout isLoggedIn={loggedIn} onLogin={onLogin} />}>
+        <Route path="/" element={<Layout/>}>
           <Route index element={<Navigate to="employees" replace />} />
           
       <Route path="employees">
@@ -29,6 +30,7 @@ function App() {
         <Route path="*" element={<Navigate to="employees" replace />} />
         </Route>.
     </Routes>
+     </SignedIn>
     <ToastContainer />
     </BrowserRouter>
   );

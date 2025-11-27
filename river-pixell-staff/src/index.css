@@ -188,3 +188,28 @@ select {
   font-weight: 600;
   font-size: 0.9rem;
 }
+
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.nav-left img {
+  height: 75px;
+  width: auto;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  font-size: 1rem;
+  align-items: center;
+}
+
+.nav__auth {
+  display: flex;
+  align-items: center;
+}

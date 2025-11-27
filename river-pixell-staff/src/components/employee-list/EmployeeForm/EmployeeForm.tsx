@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import * as EmployeeService from "../../../services/employeeService";
 import type { Employee } from "../../../types/Employee";
 import { validateEmployee } from "../../../services/employeeValidation";
+import { useEmployeeActions } from "../../../hooks/useEmployeeActions";
 
 
 interface EmployeeFormProps {
@@ -27,6 +28,8 @@ export function EmployeeForm({ formMode, employeeId }: EmployeeFormProps) {
   const [employeeData, setEmployeeData] = useState<Employee>(DEFAULT_EMPLOYEE);
   const [errors, setErrors] = useState<Map<string, string>>(new Map());
   const navigate = useNavigate();
+
+   const { createEmployee } = useEmployeeActions();
 
     const departmentOptions = useMemo(
     () => Array.from(new Set(employees.map(e => e.department))).sort(),
@@ -63,26 +66,26 @@ export function EmployeeForm({ formMode, employeeId }: EmployeeFormProps) {
     setEmployeeData(DEFAULT_EMPLOYEE);
     clearAllErrors();
   };
+    const onSubmit = async () => {
+    const employeeErrors = await validateEmployee(employeeData);
+    setErrors(employeeErrors);
+    if (employeeErrors.size > 0) return;
 
-  const onSubmit = async () => {
-      const employeeErrors = await validateEmployee(employeeData);
-  setErrors(employeeErrors);
+    try {
+      let toastMessage = "";
 
-    if (employeeErrors.size > 0) return; {
-      let toastMessage = `Successfully created new employee ${employeeData.name}!`;
-      let employeeId = employeeData.id;
+      if (formMode === "create") {
+        await createEmployee({
+          name: employeeData.name.trim(),
+          department: employeeData.department,
+          roleId: (employeeData as any).roleId ?? null,
+        } as Employee);
 
-      if (formMode == "create") {
-        const newEmployee = await EmployeeService.createNewEmployee({
-
-            name: employeeData.name.trim(),
-            department: employeeData.department,
-            roleId:(employeeData as any).roleId ?? null,
-          } as Employee);
-        } else {
-          toastMessage = "Successfully updated employee!";
-          await EmployeeService.updateEmployee(employeeData);
-        }
+        toastMessage = `Successfully created new employee ${employeeData.name}!`;
+      } else {
+        await EmployeeService.updateEmployee(employeeData);
+        toastMessage = "Successfully updated employee!";
+      }
 
       toast(toastMessage, {
         position: "bottom-center",
@@ -92,10 +95,15 @@ export function EmployeeForm({ formMode, employeeId }: EmployeeFormProps) {
         autoClose: 2500,
       });
 
-      navigate(`/employees`);
+      navigate("/employees");
       onReset();
+    } catch (err: any) {
+      toast("Error: " + err.message, {
+        position: "bottom-center",
+        theme: "dark",
+      });
     }
-  };
+  }; 
 
   return (
     <section className="formWrap">

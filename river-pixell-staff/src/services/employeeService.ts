@@ -6,10 +6,6 @@ export async function fetchEmployees() {
     return Employee;
 }
 
-export async function createNewEmployee(employee: Employee) {
-  return await employeeRepo.createEmployee(employee);
-}
-
 export async function updateEmployee(employee: Employee) {
   return await employeeRepo.updateEmployee(employee);
 }
